@@ -5,8 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-
-import java.util.List;
+import jakarta.ws.rs.core.Response;
 
 @Path("/hello")
 public class GreetingResource {
@@ -15,13 +14,13 @@ public class GreetingResource {
     EntityManager entityManager;
 
     @GET
-    public List<Person> hello() {
+    public Response hello() {
         var all = Person.<Person>listAll();
 
         Log.info("### " + all.get(0).getJson());
 
         var el = new MyJson.Element();
-        el.setCode("inner");
+        el.setCode("abc");
 
 
         // Native SQL query
@@ -31,11 +30,8 @@ public class GreetingResource {
         //        String sql = "SELECT * FROM person p WHERE p.json->'element'->>'code' = :fieldValue";
         //        String sql = "SELECT * FROM person p WHERE p.json->>'value' = 'another'";
 
-        var test = entityManager.createNativeQuery(sql, Person.class)
-                                .setParameter("fieldValue", el.getCode())
-                                .getResultList();
-        Log.info("### test: " + test);
-
-        return Person.listAll();
+        return Response.ok().entity(entityManager.createNativeQuery(sql, Person.class)
+                                                 .setParameter("fieldValue", el.getCode())
+                                                 .getResultList()).build();
     }
 }
